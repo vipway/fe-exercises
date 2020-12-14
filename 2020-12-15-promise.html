@@ -1,0 +1,100 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promise</title>
+</head>
+<style>
+  .title {
+    padding: 14px;
+    font-weight: bold;
+  }
+</style>
+
+<body>
+  <div class="title">手写promise</div>
+  <div style="background-color: yellow; padding: 12px;">
+    <div>1.Promise 是通过构造函数方式创建 即：new Promise(executor)</div>
+    <div>2.Promise 三种状态: pending-等待，resolve-成功，reject-失败 </div>
+    <div>3.特点：一旦成功或者失败，Promise状态不会在被改变（不可逆）</div>
+    <div><a href="https://segmentfault.com/a/1190000020505870">参考链接</a>></div>
+  </div>
+  <script>
+    // es5 实现版本
+    function PromisePlus(executor) {
+      var _self = this;
+      // 初始化状态为pending
+      _self.status = 'pending';
+      _self.successCallback = undefined;
+      _self.failCallback = undefined;
+
+      // 成功执行函数
+      function resolve(data) {
+        if (_self.status === 'pending') {
+          _self.status = 'fulfilled'
+          _self.successCallback(data)
+        }
+      }
+      // 失败执行函数
+      function reject(reason) {
+        if (_self.status === 'pending') {
+          _self.status = 'rejected'
+          _self.failCallback(reason)
+        }
+      }
+      executor(resolve.bind(this), reject.bind(this))
+    }
+
+    // es5 then原型
+    PromisePlus.prototype.then = function (success, fail) {
+      this.successCallback = success
+      this.failCallback = fail
+    }
+    // es5 finally原型
+    PromisePlus.prototype.finally = function (onFinally) {
+      const P = this.constructor;
+      return P.then(
+        // onFullfilled
+        function (res) {
+          P.resolve(onFinally()).then(function () {
+            return res
+          })
+        },
+        // onRejected
+        function (err) {
+          P.reject(onFinally()).then(function () {
+            throw reason
+          })
+        }
+      )
+    }
+    // PromisePlus.prototype.finally = function (callback) {
+    //   let P = this.constructor;
+    //   return P.then(
+    //     value => P.resolve(callback()).then(() => value),
+    //     reason => P.resolve(callback()).then(() => { throw reason })
+    //   );
+    // };
+    // es6实现版本
+    class Promise {
+
+    }
+
+    new PromisePlus(function (reso, reje) {
+      setTimeout(function () { reje('失败') }, 2000)
+    }).then(res => {
+      console.log(res, 'res')
+    }, err => {
+      console.log(err, 'err1')
+    }).then(res => {
+      console.log(res, 'res')
+    }, err => {
+      console.log(err, 'err1')
+    }).finally(res => {
+      console.log(res, 'finally')
+    })
+  </script>
+</body>
+
+</html>
